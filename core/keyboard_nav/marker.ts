@@ -79,6 +79,7 @@ export class Marker {
    * @param newNode The new location of the marker.
    */
   setCurNode(newNode: ASTNode) {
+    console.log(newNode);
     const oldNode = this.curNode;
     this.curNode = newNode;
     if (this.drawer) {
