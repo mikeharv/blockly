@@ -25,6 +25,7 @@ export enum ConnectionPreposition {
   BEFORE,
   AFTER,
   AROUND,
+  IN,
   INSIDE,
 }
 
@@ -385,6 +386,9 @@ export function computeMoveLabel(
     case ConnectionPreposition.AFTER:
       announcementTemplate = Msg['ANNOUNCE_MOVE_AFTER'];
       break;
+    case ConnectionPreposition.IN:
+      announcementTemplate = Msg['ANNOUNCE_MOVE_IN'];
+      break;
     case ConnectionPreposition.INSIDE:
       announcementTemplate = Msg['ANNOUNCE_MOVE_INSIDE'];
       break;
@@ -399,6 +403,7 @@ export function computeMoveLabel(
   // current connection candidate, increase the verbosity of the announcement to help
   // disambiguate them.
   const requiresDisambiguation = [
+    ConnectionPreposition.IN,
     ConnectionPreposition.INSIDE,
     ConnectionPreposition.AROUND,
   ].includes(preposition);
@@ -437,7 +442,7 @@ function getConnectionPreposition(
 ): ConnectionPreposition {
   switch (local.type) {
     case ConnectionType.OUTPUT_VALUE:
-      return ConnectionPreposition.INSIDE;
+      return ConnectionPreposition.IN;
     case ConnectionType.INPUT_VALUE:
       return ConnectionPreposition.AROUND;
     case ConnectionType.NEXT_STATEMENT:

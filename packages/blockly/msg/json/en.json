@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2026-05-05 15:35:14.081817",
+		"lastupdated": "2026-05-05 16:27:16.909030",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -482,6 +482,7 @@
 	"ANNOUNCE_MOVE_WORKSPACE": "Moving %1 on workspace.",
 	"ANNOUNCE_MOVE_BEFORE": "Moving %1 before %3.",
 	"ANNOUNCE_MOVE_AFTER": "Moving %1 after %3.",
+	"ANNOUNCE_MOVE_IN": "Moving %1 in %3 %4.",
 	"ANNOUNCE_MOVE_INSIDE": "Moving %1 inside %3 %4.",
 	"ANNOUNCE_MOVE_AROUND": "Moving %1 %2 around %3.",
 	"ANNOUNCE_MOVE_TO": "Moving %1 %2 to %3 %4.",

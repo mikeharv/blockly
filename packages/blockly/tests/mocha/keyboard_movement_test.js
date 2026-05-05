@@ -1208,7 +1208,7 @@ suite('Keyboard-driven movement', function () {
 
         cancelMove(this.workspace);
       });
-      test('announces "inside" for value connections', function () {
+      test('announces "in" for value connections', function () {
         const valueBlock = this.workspace.newBlock('text');
         valueBlock.initSvg();
         valueBlock.render();
@@ -1222,7 +1222,7 @@ suite('Keyboard-driven movement', function () {
         this.clock.tick(10);
         this.moveAndAssert(
           moveRight,
-          ['Moving', 'inside', this.getBlockLabel(parent)],
+          ['Moving', 'in', this.getBlockLabel(parent)],
           [this.getBlockLabel(valueBlock)],
         );
 
@@ -1300,7 +1300,7 @@ suite('Keyboard-driven movement', function () {
           moveRight,
           [
             'Moving',
-            'inside',
+            'in',
             this.getBlockLabel(compare),
             getInputLabelsSubset(compare, compare.getInput('A')).join(', '),
           ],
@@ -1310,7 +1310,7 @@ suite('Keyboard-driven movement', function () {
           moveRight,
           [
             'Moving',
-            'inside',
+            'in',
             this.getBlockLabel(compare),
             getInputLabelsSubset(compare, compare.getInput('B')).join(', '),
           ],
@@ -1335,12 +1335,12 @@ suite('Keyboard-driven movement', function () {
         this.clock.tick(10);
         this.moveAndAssert(
           moveRight,
-          ['Moving', 'inside', this.getBlockLabel(textJoin), 'input 2'],
+          ['Moving', 'in', this.getBlockLabel(textJoin), 'input 2'],
           [this.getBlockLabel(text)],
         );
         this.moveAndAssert(
           moveRight,
-          ['Moving', 'inside', this.getBlockLabel(textJoin), 'input 3'],
+          ['Moving', 'in', this.getBlockLabel(textJoin), 'input 3'],
           [this.getBlockLabel(text)],
         );
 
