@@ -15,6 +15,16 @@ suite('Toolbox search', () => {
 });
 
 suite('BlockSearcher', () => {
+  let workspace;
+
+  setup(() => {
+    workspace = new Blockly.Workspace();
+  });
+
+  teardown(() => {
+    workspace.dispose();
+  });
+
   test('generateTrigrams handles empty and short input', () => {
     const searcher = new BlockSearcher();
     const generateTrigrams = searcher.generateTrigrams.bind(searcher);
@@ -39,7 +49,7 @@ suite('BlockSearcher', () => {
     // Text on these:
     // lists_sort: sort <numeric> <ascending>
     // lists_split: make <list from text> with delimiter ,
-    searcher.indexBlocks(blocks);
+    searcher.indexBlocks(blocks, workspace);
 
     const numericMatches = searcher.blockTypesMatching('numeric');
     assert.sameMembers(numericMatches, [blocks[0]]);
@@ -54,7 +64,7 @@ suite('BlockSearcher', () => {
       kind: 'block',
       type: 'lists_create_with',
     };
-    searcher.indexBlocks([listCreateWithBlock]);
+    searcher.indexBlocks([listCreateWithBlock], workspace);
 
     const lowercaseMatches = searcher.blockTypesMatching('create list');
     assert.sameMembers(lowercaseMatches, [listCreateWithBlock]);
@@ -72,7 +82,7 @@ suite('BlockSearcher', () => {
       kind: 'block',
       type: 'math_constrain',
     };
-    searcher.indexBlocks([mathConstrainBlock]);
+    searcher.indexBlocks([mathConstrainBlock], workspace);
 
     const matches = searcher.blockTypesMatching('conso');
 
@@ -98,7 +108,7 @@ suite('BlockSearcher', () => {
       kind: 'block',
       type: 'searcher_underscore_block',
     };
-    searcher.indexBlocks([blockInfo]);
+    searcher.indexBlocks([blockInfo], workspace);
 
     assert.sameMembers(
       searcher.blockTypesMatching('searcher underscore block'),
@@ -125,7 +135,7 @@ suite('BlockSearcher', () => {
     const blockA = {kind: 'block', type: 'searcher_charlie'};
     const blockB = {kind: 'block', type: 'searcher_delta'};
 
-    searcher.indexBlocks([blockA, blockB]);
+    searcher.indexBlocks([blockA, blockB], workspace);
 
     const broadQueryMatches = searcher.blockTypesMatching('alpha bravo');
     assert.sameMembers(broadQueryMatches, [blockA, blockB]);
@@ -174,10 +184,16 @@ suite('BlockSearcher', () => {
 
     const searcher = new BlockSearcher();
     const blockInfo = {kind: 'block', type: 'searcher_dropdown_alt'};
-    searcher.indexBlocks([blockInfo]);
+    searcher.indexBlocks([blockInfo], workspace);
 
     assert.sameMembers(searcher.blockTypesMatching('sunny'), [blockInfo]);
-    assert.sameMembers(searcher.blockTypesMatching('cloudy'), [blockInfo]);
+    // 'cloudy' wasn't the selected option, but it should be set with the matching option if found.
+    const cloudyMatches = searcher.blockTypesMatching('cloudy');
+    assert.lengthOf(cloudyMatches, 1);
+    assert.deepEqual(cloudyMatches[0], {
+      ...blockInfo,
+      fields: {WEATHER: 'CLOUD'},
+    });
   });
 
   test('returns an empty list when no matches are found', () => {
@@ -211,7 +227,7 @@ suite('BlockSearcher', () => {
       },
     ];
 
-    searcher.indexBlocks(blocks);
+    searcher.indexBlocks(blocks, workspace);
 
     const matches = searcher.blockTypesMatching('replace');
     assert.sameMembers(matches, [blocks[0]]);
