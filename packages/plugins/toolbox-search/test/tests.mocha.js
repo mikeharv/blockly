@@ -389,7 +389,7 @@ suite('BlockSearcher', () => {
     );
   });
 
-  test('leaves matches unchanged when the query doesn\'t name a variable', () => {
+  test("leaves matches unchanged when the query doesn't name a variable", () => {
     const searcher = new BlockSearcher();
     const blocks = createVariableBlocks(['alpha']);
     searcher.indexBlocks(blocks, workspace);
