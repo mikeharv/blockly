@@ -16,7 +16,6 @@
 //
 // organize-imports-ignore
 
-import {parallel} from 'gulp';
 import {
   deployDemos,
   deployDemosBeta,
@@ -25,14 +24,8 @@ import {
 import {
   build,
   buildAdvancedCompilationTest,
-  langfiles,
-  messages,
   minify,
-  tsc,
 } from './scripts/gulpfiles/build_tasks.mjs';
-import {cleanBuildDir, cleanReleaseDir} from './scripts/lib/fs_utils.mjs';
-
-const clean = parallel(cleanBuildDir, cleanReleaseDir);
 
 // Default target if gulp invoked without specifying.
 export default build;
@@ -43,8 +36,6 @@ export default build;
 //
 // prettier-ignore
 export {
-  langfiles,
-  tsc,
   minify,
   build,
   prepareDemos,
@@ -57,7 +48,5 @@ export {
 //
 // prettier-ignore
 export {
-  messages, // Generate msg/json/en.json et al.
-  clean,
   buildAdvancedCompilationTest,
 }
