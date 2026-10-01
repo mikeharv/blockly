@@ -172,7 +172,8 @@ export class ToolboxSearchCategory
       capabilities: [Blockly.ComponentManager.Capability.POSITIONABLE],
     });
 
-    // Make the field a focusable node and first in the flyout's navigation order.
+    // Make the field a focusable node of the flyout's workspace, and the node
+    // that arrowing into the flyout lands on.
     const flyout = this.flyout;
     this.searchNode = new SearchFieldNode(this.id, input, flyout);
     this.flyoutNavigator = new SearchFlyoutNavigator(flyout, this.searchNode);
@@ -218,7 +219,7 @@ export class ToolboxSearchCategory
    * Returns the bounding rectangle of the UI element in pixel units relative to
    * the Blockly injection div.
    *
-   * @returns The component’s bounding box. Null in this case since we don't need
+   * @returns The component's bounding box. Null in this case since we don't need
    *     other elements to avoid the toolbox search field.
    */
   getBoundingRectangle(): Blockly.utils.Rect | null {
@@ -341,8 +342,8 @@ export class ToolboxSearchCategory
     super.setSelected(isSelected);
     this.setFieldVisible(isSelected);
     if (!isSelected) {
-      // The focus manager only cleans up focus indicators it can find inside
-      // the toolbox, and the search field is not in there.
+      // The field belongs to the flyout's workspace but sits outside its SVG,
+      // so core's own cleanup can't find the indicator to remove.
       this.searchField?.classList.remove('blocklyPassiveFocus');
     }
   }
@@ -398,7 +399,7 @@ export class ToolboxSearchCategory
   }
 
   /**
-   * Returns the room to reserve at the head of the flyout for the search field
+   * Returns the room to reserve at the head of the flyout for the search field.
    *
    * @returns The height of the search field, in workspace units.
    */
@@ -530,7 +531,7 @@ Blockly.Css.register(`
      A theme that sets flyoutBackgroundColour overrides this. */
   background-color: #ddd;
   position: absolute;
-   /* Matches the z-index of .blocklyFlyout. */
+  /* Matches the z-index of .blocklyFlyout. */
   z-index: 20;
 }
 
