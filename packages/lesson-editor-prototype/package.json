@@ -1,0 +1,38 @@
+{
+  "name": "lesson-editor-prototype",
+  "version": "13.4.0",
+  "description": "A Lesson Editor prototype built with Blockly.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Warning: no test specified\" && exit 0",
+    "build": "webpack --mode production",
+    "start": "webpack serve --open --mode development"
+  },
+  "keywords": [
+    "blockly"
+  ],
+  "homepage": "https://github.com/mikeharv/blockly/tree/lesson-editor-prototype/packages/lesson-editor-prototype#readme",
+  "bugs": {
+    "url": "https://github.com/RaspberryPiFoundation/blockly/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RaspberryPiFoundation/blockly.git",
+    "directory": "packages/lesson-editor-prototype"
+  },
+  "author": "Blockly team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "css-loader": "^7.1.5",
+    "html-webpack-plugin": "^5.6.7",
+    "source-map-loader": "^5.0.0",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.111.1",
+    "webpack-cli": "^7.2.3",
+    "webpack-dev-server": "^6.0.0"
+  },
+  "dependencies": {
+    "blockly": "^13.4.0"
+  }
+}

@@ -1,0 +1,49 @@
+# Builds the Lesson Editor prototype and deploys it to GitHub Pages
+# whenever lesson-editor-prototype is updated.
+
+name: Deploy Lesson Editor prototype
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [lesson-editor-prototype]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Use Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Npm Clean Install
+        run: npm ci
+
+      - name: Build Lesson Editor prototype
+        run: npx nx run lesson-editor-prototype:build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: packages/lesson-editor-prototype/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
