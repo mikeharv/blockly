@@ -24,17 +24,23 @@ code {
 #outputPane {
   display: flex;
   flex-direction: column;
-  width: 400px;
-  flex: 0 0 400px;
+  width: 240px;
+  flex: 0 0 240px;
   overflow: auto;
   margin: 1rem;
 }
 
 #generatedCode {
-  height: 50%;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
   background-color: rgb(247, 240, 228);
 }
 
+/* Holds the p5 canvas, which is up to 240x180. */
 #output {
-  height: 50%;
+  display: flex;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-bottom: 1rem;
 }

@@ -1,12 +1,12 @@
 /**
  * @license
- * Copyright 2023 Google LLC
+ * Copyright 2026 Raspberry Pi Foundation
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /*
 This toolbox contains nearly every single built-in block that Blockly offers,
-in addition to the custom block 'add_text' this sample app adds.
+in addition to the p5 blocks this app adds.
 You probably don't need every single block, and should consider either rewriting
 your toolbox from scratch, or carefully choosing whether you need each block
 listed here.
@@ -491,20 +491,6 @@ export const toolbox = {
             },
           },
         },
-        {
-          kind: 'block',
-          type: 'add_text',
-          inputs: {
-            TEXT: {
-              shadow: {
-                type: 'text',
-                fields: {
-                  TEXT: 'abc',
-                },
-              },
-            },
-          },
-        },
       ],
     },
     {
@@ -624,6 +610,144 @@ export const toolbox = {
       name: 'Functions',
       categorystyle: 'procedure_category',
       custom: 'PROCEDURE',
+    },
+    {
+      kind: 'category',
+      name: 'p5',
+      colour: 195,
+      contents: [
+        {
+          kind: 'block',
+          type: 'p5_background_color',
+          inputs: {
+            COLOR: {
+              shadow: {
+                type: 'colour_picker',
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'p5_stroke',
+          inputs: {
+            COLOR: {
+              shadow: {
+                type: 'colour_picker',
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'p5_fill',
+          inputs: {
+            COLOR: {
+              shadow: {
+                type: 'colour_picker',
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'colour_random',
+        },
+        {
+          kind: 'block',
+          type: 'p5_ellipse',
+          inputs: {
+            X: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 120},
+              },
+            },
+            Y: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 90},
+              },
+            },
+            WIDTH: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 50},
+              },
+            },
+            HEIGHT: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 50},
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'p5_rect',
+          inputs: {
+            X: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 20},
+              },
+            },
+            Y: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 20},
+              },
+            },
+            WIDTH: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 60},
+              },
+            },
+            HEIGHT: {
+              shadow: {
+                type: 'math_number',
+                fields: {NUM: 40},
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'draw_emoji',
+        },
+        {
+          kind: 'block',
+          type: 'simple_circle',
+          inputs: {
+            COLOR: {
+              shadow: {
+                type: 'colour_picker',
+              },
+            },
+          },
+        },
+        {
+          kind: 'label',
+          text: 'Writing text',
+        },
+        {
+          kind: 'block',
+          type: 'write_text_with_shadow',
+          inputs: {
+            TEXT: {
+              shadow: {
+                type: 'text_only',
+              },
+            },
+          },
+        },
+        {
+          kind: 'block',
+          type: 'write_text_without_shadow',
+        },
+      ],
     },
   ],
 };

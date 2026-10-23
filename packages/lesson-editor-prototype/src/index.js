@@ -1,11 +1,13 @@
 /**
  * @license
- * Copyright 2023 Google LLC
+ * Copyright 2026 Raspberry Pi Foundation
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import * as Blockly from 'blockly';
-import {blocks} from './blocks/text';
+import {installAllBlocks as installColourBlocks} from '@blockly/field-colour';
+import p5 from 'p5';
+import {blocks} from './blocks/p5';
 import {forBlock} from './generators/javascript';
 import {javascriptGenerator} from 'blockly/javascript';
 import {save, load} from './serialization';
@@ -13,8 +15,11 @@ import {toolbox} from './toolbox';
 import './index.css';
 
 // Register the blocks and generator with Blockly
+installColourBlocks({javascript: javascriptGenerator});
 Blockly.common.defineBlocks(blocks);
 Object.assign(javascriptGenerator.forBlock, forBlock);
+// The generated code refers to the p5 instance as 'sketch'.
+javascriptGenerator.addReservedWords('sketch');
 
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById('generatedCode').firstChild;
@@ -22,19 +27,25 @@ const outputDiv = document.getElementById('output');
 const blocklyDiv = document.getElementById('blocklyDiv');
 const ws = Blockly.inject(blocklyDiv, {toolbox});
 
-// This function resets the code and output divs, shows the
-// generated code from the workspace, and evals the code.
-// In a real application, you probably shouldn't use `eval`.
+// The running p5 sketch, if any.
+let currentSketch = null;
+
+// This function shows the generated code from the workspace and runs
+// it as a new p5 sketch in the output div, replacing the previous one.
+// In a real application, you probably shouldn't run arbitrary code.
 const runCode = () => {
   const code = javascriptGenerator.workspaceToCode(ws);
   codeDiv.innerText = code;
 
-  outputDiv.innerHTML = '';
+  // remove() stops the old sketch's draw loop and deletes its canvas.
+  currentSketch?.remove();
 
-  // Wrap `eval` in a `try/catch` so that any runtime errors are
-  // logged to the console, instead of failing quietly.
+  // Wrap the sketch in a `try/catch` so that any errors are logged
+  // to the console, instead of failing quietly.
   try {
-    eval(code);
+    // Run p5 in instance mode, passing the instance in as `sketch`.
+    const sketchFn = new Function('sketch', code);
+    currentSketch = new p5(sketchFn, outputDiv);
   } catch (error) {
     console.log(error);
   }
