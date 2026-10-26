@@ -1,6 +1,26 @@
 body {
   margin: 0;
   max-width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #ccc;
+  font-family: sans-serif;
+}
+
+#titleInput {
+  width: 20rem;
+}
+
+#status {
+  margin: 0 0 0 auto;
 }
 
 pre,
@@ -12,7 +32,9 @@ code {
   display: flex;
   width: 100%;
   max-width: 100vw;
-  height: 100vh;
+  flex: 1;
+  /* Lets the container shrink so its children's height: 100% fits. */
+  min-height: 0;
 }
 
 #blocklyDiv {

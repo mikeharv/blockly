@@ -10,17 +10,17 @@ import * as Blockly from 'blockly/core';
 // p5 Basic Setup Blocks
 
 const p5SetupJson = {
-  'type': 'p5_setup',
-  'message0': 'setup %1',
-  'args0': [
+  type: 'p5_setup',
+  message0: 'setup %1',
+  args0: [
     {
-      'type': 'input_statement',
-      'name': 'STATEMENTS',
+      type: 'input_statement',
+      name: 'STATEMENTS',
     },
   ],
-  'colour': 300,
-  'tooltip': 'Setup the p5 canvas. This code is run once.',
-  'helpUrl': '',
+  colour: 300,
+  tooltip: 'Setup the p5 canvas. This code is run once.',
+  helpUrl: '',
 };
 
 const p5Setup = {
@@ -32,17 +32,17 @@ const p5Setup = {
 };
 
 const p5DrawJson = {
-  'type': 'p5_draw',
-  'message0': 'draw %1',
-  'args0': [
+  type: 'p5_draw',
+  message0: 'draw %1',
+  args0: [
     {
-      'type': 'input_statement',
-      'name': 'STATEMENTS',
+      type: 'input_statement',
+      name: 'STATEMENTS',
     },
   ],
-  'colour': 300,
-  'tooltip': 'Draw on the canvas. This code is run continuously.',
-  'helpUrl': '',
+  colour: 300,
+  tooltip: 'Draw on the canvas. This code is run continuously.',
+  helpUrl: '',
 };
 
 const p5Draw = {
@@ -54,29 +54,29 @@ const p5Draw = {
 };
 
 const p5CanvasJson = {
-  'type': 'p5_canvas',
-  'message0': 'create canvas with width %1 height %2',
-  'args0': [
+  type: 'p5_canvas',
+  message0: 'create canvas with width %1 height %2',
+  args0: [
     {
-      'type': 'field_number',
-      'name': 'WIDTH',
-      'value': 240,
-      'max': 240,
-      'precision': 1,
+      type: 'field_number',
+      name: 'WIDTH',
+      value: 240,
+      max: 240,
+      precision: 1,
     },
     {
-      'type': 'field_number',
-      'name': 'HEIGHT',
-      'value': 180,
-      'max': 180,
-      'precision': 1,
+      type: 'field_number',
+      name: 'HEIGHT',
+      value: 180,
+      max: 180,
+      precision: 1,
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 300,
-  'tooltip': 'Create a p5 canvas of the specified size.',
-  'helpUrl': '',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 300,
+  tooltip: 'Create a p5 canvas of the specified size.',
+  helpUrl: '',
 };
 
 const p5Canvas = {
@@ -89,59 +89,59 @@ const p5Canvas = {
 };
 
 const buttonsJson = {
-  'type': 'buttons',
-  'message0': 'If %1 %2 Then %3 %4 more %5 %6 %7',
-  'args0': [
+  type: 'buttons',
+  message0: 'If %1 %2 Then %3 %4 more %5 %6 %7',
+  args0: [
     {
-      'type': 'field_image',
-      'name': 'BUTTON1',
-      'src': 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
-      'width': 30,
-      'height': 30,
-      'alt': '*',
+      type: 'field_image',
+      name: 'BUTTON1',
+      src: 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
+      width: 30,
+      height: 30,
+      alt: '*',
     },
     {
-      'type': 'input_value',
-      'name': 'VALUE1',
-      'check': '',
+      type: 'input_value',
+      name: 'VALUE1',
+      check: '',
     },
     {
-      'type': 'field_image',
-      'name': 'BUTTON2',
-      'src': 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
-      'width': 30,
-      'height': 30,
-      'alt': '*',
+      type: 'field_image',
+      name: 'BUTTON2',
+      src: 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
+      width: 30,
+      height: 30,
+      alt: '*',
     },
     {
-      'type': 'input_dummy',
-      'name': 'DUMMY1',
-      'check': '',
+      type: 'input_dummy',
+      name: 'DUMMY1',
+      check: '',
     },
     {
-      'type': 'input_value',
-      'name': 'VALUE2',
-      'check': '',
+      type: 'input_value',
+      name: 'VALUE2',
+      check: '',
     },
     {
-      'type': 'input_statement',
-      'name': 'STATEMENT1',
-      'check': 'Number',
+      type: 'input_statement',
+      name: 'STATEMENT1',
+      check: 'Number',
     },
     {
-      'type': 'field_image',
-      'name': 'BUTTON3',
-      'src': 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
-      'width': 30,
-      'height': 30,
-      'alt': '*',
+      type: 'field_image',
+      name: 'BUTTON3',
+      src: 'https://www.gstatic.com/codesite/ph/images/star_on.gif',
+      width: 30,
+      height: 30,
+      alt: '*',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 230,
-  'tooltip': '',
-  'helpUrl': '',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 230,
+  tooltip: '',
+  helpUrl: '',
 };
 
 const buttonsBlock = {
@@ -157,217 +157,217 @@ const buttonsBlock = {
 };
 
 const background = {
-  'type': 'p5_background_color',
-  'message0': 'Set background color to %1',
-  'args0': [
+  type: 'p5_background_color',
+  message0: 'Set background color to %1',
+  args0: [
     {
-      'type': 'input_value',
-      'name': 'COLOR',
+      type: 'input_value',
+      name: 'COLOR',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 195,
-  'tooltip': 'Set the background color of the canvas',
-  'helpUrl': '',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 195,
+  tooltip: 'Set the background color of the canvas',
+  helpUrl: '',
 };
 
 const stroke = {
-  'type': 'p5_stroke',
-  'message0': 'Set stroke color to %1',
-  'args0': [
+  type: 'p5_stroke',
+  message0: 'Set stroke color to %1',
+  args0: [
     {
-      'type': 'input_value',
-      'name': 'COLOR',
+      type: 'input_value',
+      name: 'COLOR',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 195,
-  'tooltip': 'Set the stroke color',
-  'helpUrl': '',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 195,
+  tooltip: 'Set the stroke color',
+  helpUrl: '',
 };
 
 const fill = {
-  'type': 'p5_fill',
-  'message0': 'Set fill color to %1',
-  'args0': [
+  type: 'p5_fill',
+  message0: 'Set fill color to %1',
+  args0: [
     {
-      'type': 'input_value',
-      'name': 'COLOR',
+      type: 'input_value',
+      name: 'COLOR',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 195,
-  'tooltip': 'Set the fill color',
-  'helpUrl': '',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 195,
+  tooltip: 'Set the fill color',
+  helpUrl: '',
 };
 
 const ellipse = {
-  'type': 'p5_ellipse',
-  'message0': 'draw ellipse %1 x %2 y %3 width %4 height %5',
-  'args0': [
+  type: 'p5_ellipse',
+  message0: 'draw ellipse %1 x %2 y %3 width %4 height %5',
+  args0: [
     {
-      'type': 'input_dummy',
+      type: 'input_dummy',
     },
     {
-      'type': 'input_value',
-      'name': 'X',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'X',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'Y',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'Y',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'WIDTH',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'WIDTH',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'HEIGHT',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'HEIGHT',
+      check: 'Number',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 230,
-  'tooltip': 'Draw an ellipse on the canvas.',
-  'helpUrl': 'https://p5js.org/reference/#/p5/ellipse',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 230,
+  tooltip: 'Draw an ellipse on the canvas.',
+  helpUrl: 'https://p5js.org/reference/#/p5/ellipse',
 };
 
 const rect = {
-  'type': 'p5_rect',
-  'message0': 'draw rectangle %1 x %2 y %3 width %4 height %5',
-  'args0': [
+  type: 'p5_rect',
+  message0: 'draw rectangle %1 x %2 y %3 width %4 height %5',
+  args0: [
     {
-      'type': 'input_dummy',
+      type: 'input_dummy',
     },
     {
-      'type': 'input_value',
-      'name': 'X',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'X',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'Y',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'Y',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'WIDTH',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'WIDTH',
+      check: 'Number',
     },
     {
-      'type': 'input_value',
-      'name': 'HEIGHT',
-      'check': 'Number',
+      type: 'input_value',
+      name: 'HEIGHT',
+      check: 'Number',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 230,
-  'tooltip': 'Draw a rectangle on the canvas, from its top-left corner.',
-  'helpUrl': 'https://p5js.org/reference/#/p5/rect',
+  previousStatement: null,
+  nextStatement: null,
+  colour: 230,
+  tooltip: 'Draw a rectangle on the canvas, from its top-left corner.',
+  helpUrl: 'https://p5js.org/reference/#/p5/rect',
 };
 
 const draw_emoji = {
-  'type': 'draw_emoji',
-  'tooltip': '',
-  'helpUrl': '',
-  'message0': 'draw %1 %2',
-  'args0': [
+  type: 'draw_emoji',
+  tooltip: '',
+  helpUrl: '',
+  message0: 'draw %1 %2',
+  args0: [
     {
-      'type': 'field_dropdown',
-      'name': 'emoji',
-      'options': [
+      type: 'field_dropdown',
+      name: 'emoji',
+      options: [
         ['❤️', '❤️'],
         ['✨', '✨'],
         ['🐻', '🐻'],
       ],
     },
     {
-      'type': 'input_dummy',
-      'name': '',
+      type: 'input_dummy',
+      name: '',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 230,
-  'inputsInline': true,
+  previousStatement: null,
+  nextStatement: null,
+  colour: 230,
+  inputsInline: true,
 };
 
 const simpleCircle = {
-  'type': 'simple_circle',
-  'tooltip': '',
-  'helpUrl': '',
-  'message0': 'draw %1 circle %2',
-  'args0': [
+  type: 'simple_circle',
+  tooltip: '',
+  helpUrl: '',
+  message0: 'draw %1 circle %2',
+  args0: [
     {
-      'type': 'input_value',
-      'name': 'COLOR',
+      type: 'input_value',
+      name: 'COLOR',
     },
     {
-      'type': 'input_dummy',
+      type: 'input_dummy',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 230,
-  'inputsInline': true,
+  previousStatement: null,
+  nextStatement: null,
+  colour: 230,
+  inputsInline: true,
 };
 
 const writeTextWithoutShadow = {
-  'type': 'write_text_without_shadow',
-  'tooltip': '',
-  'helpUrl': '',
-  'message0': 'write without shadow %1',
-  'args0': [
+  type: 'write_text_without_shadow',
+  tooltip: '',
+  helpUrl: '',
+  message0: 'write without shadow %1',
+  args0: [
     {
-      'type': 'field_input',
-      'name': 'TEXT',
-      'text': 'bit',
+      type: 'field_input',
+      name: 'TEXT',
+      text: 'bit',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 225,
+  previousStatement: null,
+  nextStatement: null,
+  colour: 225,
 };
 
 const writeTextWithShadow = {
-  'type': 'write_text_with_shadow',
-  'tooltip': '',
-  'helpUrl': '',
-  'message0': 'write with shadow %1',
-  'args0': [
+  type: 'write_text_with_shadow',
+  tooltip: '',
+  helpUrl: '',
+  message0: 'write with shadow %1',
+  args0: [
     {
-      'type': 'input_value',
-      'name': 'TEXT',
-      'check': 'String',
+      type: 'input_value',
+      name: 'TEXT',
+      check: 'String',
     },
   ],
-  'previousStatement': null,
-  'nextStatement': null,
-  'colour': 225,
+  previousStatement: null,
+  nextStatement: null,
+  colour: 225,
 };
 
 const textBlock = {
-  'type': 'text_only',
-  'tooltip': '',
-  'helpUrl': '',
-  'message0': '%1',
-  'args0': [
+  type: 'text_only',
+  tooltip: '',
+  helpUrl: '',
+  message0: '%1',
+  args0: [
     {
-      'type': 'field_input',
-      'name': 'TEXT',
-      'text': 'micro',
+      type: 'field_input',
+      name: 'TEXT',
+      text: 'micro',
     },
   ],
-  'output': 'String',
-  'colour': 225,
+  output: 'String',
+  colour: 225,
 };
 
 // Create the block definitions for all the JSON-only blocks.
@@ -386,9 +386,9 @@ const jsonBlocks = Blockly.common.createBlockDefinitionsFromJsonArray([
 ]);
 
 export const blocks = {
-  'p5_setup': p5Setup,
-  'p5_draw': p5Draw,
-  'p5_canvas': p5Canvas,
-  'buttons_block': buttonsBlock,
+  p5_setup: p5Setup,
+  p5_draw: p5Draw,
+  p5_canvas: p5Canvas,
+  buttons_block: buttonsBlock,
   ...jsonBlocks,
 };

@@ -10,8 +10,14 @@ import p5 from 'p5';
 import {blocks} from './blocks/p5';
 import {forBlock} from './generators/javascript';
 import {javascriptGenerator} from 'blockly/javascript';
-import {save, load} from './serialization';
-import {toolbox} from './toolbox';
+import {findMissingRequirements} from '@blockly/plugin-lesson-authoring';
+import {
+  buildArtifact,
+  defaultArtifact,
+  loadInitialState,
+  save,
+  load,
+} from './serialization';
 import './index.css';
 
 // Register the blocks and generator with Blockly
@@ -25,7 +31,16 @@ javascriptGenerator.addReservedWords('sketch');
 const codeDiv = document.getElementById('generatedCode').firstChild;
 const outputDiv = document.getElementById('output');
 const blocklyDiv = document.getElementById('blocklyDiv');
-const ws = Blockly.inject(blocklyDiv, {toolbox});
+const titleInput = document.getElementById('titleInput');
+const importInput = document.getElementById('importInput');
+const statusText = document.getElementById('status');
+
+// The workspace for the current lesson. Each lesson gets its own.
+let ws = null;
+
+// The lesson's toolbox. Blockly has no API to read a toolbox definition
+// back out of a workspace, so the editor keeps its own copy.
+let currentToolbox = null;
 
 // The running p5 sketch, if any.
 let currentSketch = null;
@@ -51,22 +66,21 @@ const runCode = () => {
   }
 };
 
-// Load the initial state from storage and run the code.
-load(ws);
-runCode();
+const currentArtifact = () =>
+  buildArtifact(ws, titleInput.value, currentToolbox);
 
 // Every time the workspace changes state, save the changes to storage.
-ws.addChangeListener((e) => {
+const saveOnChange = (e) => {
   // UI events are things like scrolling, zooming, etc.
   // No need to save after one of these.
   if (e.isUiEvent) return;
-  save(ws);
-});
+  save(currentArtifact());
+};
 
 // Whenever the workspace changes meaningfully, run the code again.
-ws.addChangeListener((e) => {
+const runOnChange = (e) => {
   // Don't run the code when the workspace finishes loading; we're
-  // already running it once when the application starts.
+  // already running it once when a lesson is opened.
   // Don't run the code during drags; we might have invalid state.
   if (
     e.isUiEvent ||
@@ -75,5 +89,81 @@ ws.addChangeListener((e) => {
   ) {
     return;
   }
+  runCode();
+};
+
+// Loads an artifact into the editor, replacing the current lesson. The
+// workspace is re-created rather than updated because Blockly can't switch
+// an existing workspace between a categorized toolbox and a flyout.
+const openArtifact = (artifact) => {
+  ws?.dispose();
+  // Cleared first so a failed inject doesn't leave a disposed workspace.
+  ws = null;
+  ws = Blockly.inject(blocklyDiv, {toolbox: artifact.toolbox});
+  ws.addChangeListener(saveOnChange);
+  ws.addChangeListener(runOnChange);
+  loadInitialState(artifact, ws);
+  currentToolbox = artifact.toolbox;
+  titleInput.value = artifact.title ?? '';
+};
+
+// Load the saved lesson and run the code.
+openArtifact(load());
+runCode();
+
+titleInput.addEventListener('input', () => save(currentArtifact()));
+
+// Replaces the lesson with the default one, once the author confirms.
+document.getElementById('newButton').addEventListener('click', () => {
+  if (!confirm('Start a new lesson? The current lesson will be discarded.')) {
+    return;
+  }
+  openArtifact(defaultArtifact);
+  save(currentArtifact());
+  runCode();
+  statusText.textContent = 'Started a new lesson';
+});
+
+// Downloads the lesson as a JSON file named after its title.
+document.getElementById('exportButton').addEventListener('click', () => {
+  const json = JSON.stringify(currentArtifact(), null, 2);
+  const url = URL.createObjectURL(new Blob([json], {type: 'application/json'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${titleInput.value.trim() || 'lesson'}.json`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url));
+});
+
+document
+  .getElementById('importButton')
+  .addEventListener('click', () => importInput.click());
+
+// Replaces the lesson with one from a JSON file, unless the file is invalid
+// or needs blocks this app doesn't define.
+importInput.addEventListener('change', async () => {
+  const file = importInput.files?.[0];
+  // Reset so that choosing the same file again still fires `change`.
+  importInput.value = '';
+  if (!file) return;
+
+  const previous = currentArtifact();
+  try {
+    const artifact = JSON.parse(await file.text());
+    const missing = findMissingRequirements(artifact, {
+      blockTypes: Object.keys(Blockly.Blocks),
+    });
+    if (missing.blockTypes.length) {
+      statusText.textContent = `Can't import ${file.name}. Missing blocks: ${missing.blockTypes.join(', ')}`;
+      return;
+    }
+    openArtifact(artifact);
+    statusText.textContent = `Imported ${file.name}`;
+  } catch (error) {
+    // Loading can fail partway through, so put the previous lesson back.
+    openArtifact(previous);
+    statusText.textContent = `Can't import ${file.name}. ${error.message}`;
+  }
+  save(currentArtifact());
   runCode();
 });

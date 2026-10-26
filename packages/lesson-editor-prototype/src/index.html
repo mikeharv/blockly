@@ -5,6 +5,19 @@
     <title>Blockly Lesson Editor Prototype</title>
   </head>
   <body>
+    <header id="toolbar">
+      <label for="titleInput">Lesson title</label>
+      <input id="titleInput" type="text" placeholder="Untitled lesson" />
+      <button id="newButton" type="button">New lesson</button>
+      <button id="exportButton" type="button">Export lesson</button>
+      <button id="importButton" type="button">Import lesson</button>
+      <input
+        id="importInput"
+        type="file"
+        accept=".json,application/json"
+        hidden />
+      <p id="status" role="status"></p>
+    </header>
     <div id="pageContainer">
       <div id="blocklyDiv"></div>
       <div id="outputPane">

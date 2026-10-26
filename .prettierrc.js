@@ -26,7 +26,7 @@ module.exports = {
       },
     },
     {
-      files: 'packages/plugins/**/*',
+      files: ['packages/plugins/**/*', 'packages/lesson-editor-prototype/**/*'],
       options: {
         // Some properties must be quoted to preserve closure compiler behavior.
         // If at least one property in an object requires quotes, quote all 
