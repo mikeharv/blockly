@@ -10,7 +10,10 @@ import p5 from 'p5';
 import {blocks} from './blocks/p5';
 import {forBlock} from './generators/javascript';
 import {javascriptGenerator} from 'blockly/javascript';
-import {findMissingRequirements} from '@blockly/plugin-lesson-authoring';
+import {
+  findMissingRequirements,
+  registerLessonAuthoringContextMenuOptions,
+} from '@blockly/plugin-lesson-authoring';
 import {
   buildArtifact,
   defaultArtifact,
@@ -20,12 +23,18 @@ import {
 } from './serialization';
 import './index.css';
 
+window.Blockly = Blockly;
+
 // Register the blocks and generator with Blockly
 installColourBlocks({javascript: javascriptGenerator});
 Blockly.common.defineBlocks(blocks);
 Object.assign(javascriptGenerator.forBlock, forBlock);
 // The generated code refers to the p5 instance as 'sketch'.
 javascriptGenerator.addReservedWords('sketch');
+
+// Context menu items are registered globally, so this happens once rather
+// than for each lesson's workspace.
+registerLessonAuthoringContextMenuOptions();
 
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById('generatedCode').firstChild;
@@ -99,7 +108,10 @@ const openArtifact = (artifact) => {
   ws?.dispose();
   // Cleared first so a failed inject doesn't leave a disposed workspace.
   ws = null;
-  ws = Blockly.inject(blocklyDiv, {toolbox: artifact.toolbox});
+  ws = Blockly.inject(blocklyDiv, {
+    toolbox: artifact.toolbox,
+    renderer: Math.random() > 0.5 ? 'zelos' : 'thrasos',
+  });
   ws.addChangeListener(saveOnChange);
   ws.addChangeListener(runOnChange);
   loadInitialState(artifact, ws);
