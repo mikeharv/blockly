@@ -11,6 +11,7 @@ import {blocks} from './blocks/p5';
 import {forBlock} from './generators/javascript';
 import {javascriptGenerator} from 'blockly/javascript';
 import {
+  BlockStateIndicators,
   findMissingRequirements,
   registerLessonAuthoringContextMenuOptions,
 } from '@blockly/plugin-lesson-authoring';
@@ -43,9 +44,13 @@ const blocklyDiv = document.getElementById('blocklyDiv');
 const titleInput = document.getElementById('titleInput');
 const importInput = document.getElementById('importInput');
 const statusText = document.getElementById('status');
+const stateIconsInput = document.getElementById('stateIconsInput');
 
 // The workspace for the current lesson. Each lesson gets its own.
 let ws = null;
+
+// Icons showing which blocks can't be moved, edited or deleted.
+let stateIndicators = null;
 
 // The lesson's toolbox. Blockly has no API to read a toolbox definition
 // back out of a workspace, so the editor keeps its own copy.
@@ -115,6 +120,11 @@ const openArtifact = (artifact) => {
   ws.addChangeListener(saveOnChange);
   ws.addChangeListener(runOnChange);
   loadInitialState(artifact, ws);
+  // Created after loading, which doesn't fire events for the indicators to
+  // find the loaded blocks from.
+  stateIndicators = new BlockStateIndicators(ws, {
+    enabled: stateIconsInput.checked,
+  });
   currentToolbox = artifact.toolbox;
   titleInput.value = artifact.title ?? '';
 };
@@ -124,6 +134,10 @@ openArtifact(load());
 runCode();
 
 titleInput.addEventListener('input', () => save(currentArtifact()));
+
+stateIconsInput.addEventListener('change', () =>
+  stateIndicators.setEnabled(stateIconsInput.checked),
+);
 
 // Replaces the lesson with the default one, once the author confirms.
 document.getElementById('newButton').addEventListener('click', () => {
