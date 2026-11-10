@@ -16,10 +16,6 @@
         type="file"
         accept=".json,application/json"
         hidden />
-      <label>
-        <input id="stateIconsInput" type="checkbox" checked />
-        Show block states
-      </label>
       <p id="status" role="status"></p>
     </header>
     <div id="pageContainer">
@@ -27,6 +23,19 @@
       <div id="outputPane">
         <div id="output"></div>
         <pre id="generatedCode"><code></code></pre>
+        <div id="viewOptions">
+          <label>
+            <input id="stateIconsInput" type="checkbox" checked />
+            Show block states
+          </label>
+          <label>
+            Renderer
+            <select id="rendererSelect">
+              <option value="thrasos" selected>Thrasos</option>
+              <option value="zelos">Zelos</option>
+            </select>
+          </label>
+        </div>
       </div>
     </div>
   </body>

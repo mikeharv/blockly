@@ -45,6 +45,7 @@ const titleInput = document.getElementById('titleInput');
 const importInput = document.getElementById('importInput');
 const statusText = document.getElementById('status');
 const stateIconsInput = document.getElementById('stateIconsInput');
+const rendererSelect = document.getElementById('rendererSelect');
 
 // The workspace for the current lesson. Each lesson gets its own.
 let ws = null;
@@ -115,7 +116,7 @@ const openArtifact = (artifact) => {
   ws = null;
   ws = Blockly.inject(blocklyDiv, {
     toolbox: artifact.toolbox,
-    renderer: Math.random() > 0.5 ? 'zelos' : 'thrasos',
+    renderer: rendererSelect.value,
   });
   ws.addChangeListener(saveOnChange);
   ws.addChangeListener(runOnChange);
@@ -137,6 +138,12 @@ titleInput.addEventListener('input', () => save(currentArtifact()));
 
 stateIconsInput.addEventListener('change', () =>
   stateIndicators.setEnabled(stateIconsInput.checked),
+);
+
+// A workspace's renderer is fixed when it is injected, so switching reopens
+// the current lesson in a new workspace. This clears the undo history.
+rendererSelect.addEventListener('change', () =>
+  openArtifact(currentArtifact()),
 );
 
 // Replaces the lesson with the default one, once the author confirms.

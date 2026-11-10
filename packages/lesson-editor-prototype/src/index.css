@@ -59,6 +59,16 @@ code {
   background-color: rgb(247, 240, 228);
 }
 
+/* Settings that change how the editor looks, not the lesson itself. */
+#viewOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  margin-top: 1rem;
+  font-family: sans-serif;
+}
+
 /* Holds the p5 canvas, which is up to 240x180. */
 #output {
   display: flex;
