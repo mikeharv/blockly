@@ -3,10 +3,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // Base config that applies to either development or production mode.
 const config = {
-  entry: './src/index.js',
+  // TODO: Remove the toolbox editor spike once its findings are in the plan.
+  entry: {
+    bundle: './src/index.js',
+    spike: './src/toolbox-editor-spike/index.js',
+  },
   output: {
     // Compile the source files into a bundle.
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
   },
@@ -29,6 +33,12 @@ const config = {
     // created above added in a script tag.
     new HtmlWebpackPlugin({
       template: 'src/index.html',
+      chunks: ['bundle'],
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/toolbox-editor-spike/index.html',
+      filename: 'toolbox-editor-spike.html',
+      chunks: ['spike'],
     }),
   ],
 };

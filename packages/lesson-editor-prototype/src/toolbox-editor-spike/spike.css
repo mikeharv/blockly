@@ -1,0 +1,74 @@
+#editorDiv {
+  flex: 1 1 auto;
+  position: relative;
+  /* The palette at its widest, the toolbox at its narrowest, and room for
+     pane 3, so a narrow window scrolls rather than squeezing pane 3. */
+  min-width: calc(250px + 100px + 250px);
+}
+
+/* So the toolbox stays a drop target with no categories left in it. Core
+   measures its width from the element, so pane 3 moves to match. */
+#editorDiv .blocklyToolbox {
+  min-width: 100px;
+}
+
+.spikePopover {
+  position: absolute;
+  z-index: 1000;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  font: 13px sans-serif;
+}
+
+.spikePopover input[type='number'] {
+  width: 4rem;
+}
+
+/* A larger target for dragging toolbox separators, without changing their look. */
+.blocklyTreeSeparator {
+  position: relative;
+}
+
+.blocklyTreeSeparator::before {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
+}
+
+#toolbar #status {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.spikeSwatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.spikePopover:has(.spikeSwatches) {
+  flex-wrap: wrap;
+  max-width: 220px;
+}
+
+.spikeSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.spikeSwatch[aria-checked='true'] {
+  outline: 2px solid #333;
+  outline-offset: 1px;
+}

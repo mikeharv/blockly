@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Toolbox editor spike</title>
+  </head>
+  <body>
+    <header id="toolbar">
+      <strong>Toolbox editor spike</strong>
+      <label>
+        Toolbox type
+        <select id="modeSelect">
+          <option value="continuous" selected>Continuous</option>
+          <option value="category">Categories</option>
+          <option value="flyout">Flyout only</option>
+        </select>
+      </label>
+      <label>
+        Renderer
+        <select id="rendererSelect">
+          <option value="zelos" selected>Zelos</option>
+          <option value="thrasos">Thrasos</option>
+          <option value="geras">Geras</option>
+        </select>
+      </label>
+      <label>
+        <input id="testBlocksInput" type="checkbox" />
+        Include test blocks
+      </label>
+      <button id="logButton" type="button">Log toolbox JSON</button>
+      <p id="status" role="status"></p>
+    </header>
+    <div id="editorDiv"></div>
+  </body>
+</html>
