@@ -10,6 +10,7 @@
  */
 
 import * as Blockly from 'blockly';
+import {ContinuousMetrics} from '@blockly/continuous-toolbox';
 import {applyEditorDragStrategy, isNewFromPalette} from './drag_strategy';
 import {SurfaceItem} from './surface_item';
 
@@ -21,6 +22,57 @@ const READ_ONLY_MESSAGE =
 
 /** Matches Flyout.GAP_Y. */
 const GAP_Y = MARGIN * 3;
+
+/**
+ * Pane 3's metrics. A real flyout can't scroll above its contents, so
+ * neither can pane 3: its scroll area starts at the top of the canvas,
+ * where the layout starts, leaving the margin above the first item to drop
+ * into. Below the contents, core's padding stays, so continuous mode can
+ * scroll its last section to the top.
+ */
+export class FlyoutPaneMetrics extends ContinuousMetrics {
+  /** @returns {number} The preview header's height, above pane 3. */
+  getHeaderHeight() {
+    return this.workspace_.getToolbox()?.getHeaderHeight?.() ?? 0;
+  }
+
+  /** Pane 3 starts below the preview header. @override */
+  getAbsoluteMetrics() {
+    const metrics = super.getAbsoluteMetrics();
+    return {...metrics, top: metrics.top + this.getHeaderHeight()};
+  }
+
+  /** @override */
+  getViewMetrics(getWorkspaceCoordinates) {
+    const metrics = super.getViewMetrics(getWorkspaceCoordinates);
+    const scale = getWorkspaceCoordinates ? this.workspace_.scale : 1;
+    return {
+      ...metrics,
+      height: metrics.height - this.getHeaderHeight() / scale,
+    };
+  }
+
+  /** @override */
+  getPaddedContent_(viewMetrics, contentMetrics) {
+    const padded = super.getPaddedContent_(viewMetrics, contentMetrics);
+    return {
+      ...padded,
+      top: 0,
+      bottom: Math.max(padded.bottom, viewMetrics.height),
+    };
+  }
+}
+
+/**
+ * Shows, or stops showing, that a dragged item won't land where it is, the
+ * way core shows a drag that would delete. Core's own class can't be used:
+ * the dragger resets it from the drop target on every move.
+ * @param {!Blockly.IDraggable} item The dragged item.
+ * @param {boolean} on Whether it won't land.
+ */
+export function setWontLand(item, on) {
+  item.getSvgRoot?.()?.classList.toggle('spikeWontLand', on);
+}
 
 /** Holds and lays out the contents shown in pane 3. */
 export class FlyoutPane {
@@ -268,10 +320,12 @@ export class FlyoutPane {
       this.showRejection(item);
       return;
     }
-    this.hideBadge();
+    this.clearWontLand();
     const lands =
       item.kind !== 'category' && !connecting && !this.readOnly && overPane;
     if (!lands) {
+      // Categories only go in the toolbox pane.
+      if (overPane && item.kind === 'category') this.markWontLand(item);
       if (this.preview) this.clearPreview();
       return;
     }
@@ -310,13 +364,13 @@ export class FlyoutPane {
   }
 
   /**
-   * Shows that the dragged item can't be dropped where it is: a badge on
-   * it, and the marker back in its original place if it has one.
+   * Shows that the dragged item can't be dropped where it is: core's
+   * would-delete look, and the marker back in its original place if it has one.
    * @param {!Blockly.BlockSvg|!SurfaceItem} item The dragged item.
    */
   showRejection(item) {
     this.rejected = item;
-    this.showBadge(item);
+    this.markWontLand(item);
     if (this.origin?.item === item) {
       this.showPreview(item, this.origin.index);
     } else if (this.preview) {
@@ -340,35 +394,19 @@ export class FlyoutPane {
   }
 
   /**
-   * Shows a "can't drop here" badge at the dragged item's top right corner.
+   * Gives the dragged item core's would-delete look: its delete cursor,
+   * which is what a drag shows over somewhere it can't stay.
    * @param {!Blockly.BlockSvg|!SurfaceItem} item The dragged item.
    */
-  showBadge(item) {
-    if (!this.badge) {
-      const {dom} = Blockly.utils;
-      const {Svg} = Blockly.utils;
-      this.badge = dom.createSvgElement(
-        Svg.G,
-        {class: 'spikeNoDropBadge'},
-        null,
-      );
-      dom.createSvgElement(Svg.CIRCLE, {r: 9}, this.badge);
-      dom.createSvgElement(
-        Svg.LINE,
-        {x1: -6, y1: -6, x2: 6, y2: 6},
-        this.badge,
-      );
-    }
-    this.workspace.getLayerManager().getDragLayer()?.append(this.badge);
-    const rect = item.getBoundingRectangle();
-    this.badge.setAttribute(
-      'transform',
-      `translate(${rect.right + 4},${rect.top})`,
-    );
+  markWontLand(item) {
+    if (this.wontLand !== item) this.clearWontLand();
+    this.wontLand = item;
+    setWontLand(item, true);
   }
 
-  hideBadge() {
-    this.badge?.remove();
+  clearWontLand() {
+    if (this.wontLand) setWontLand(this.wontLand, false);
+    this.wontLand = null;
   }
 
   /**
@@ -409,7 +447,7 @@ export class FlyoutPane {
    */
   onDragEnd(item, disposition) {
     const index = this.preview?.index;
-    this.hideBadge();
+    this.clearWontLand();
     this.origin = null;
     this.preview = null;
     this.removeGhost();
@@ -759,14 +797,10 @@ function isSeparator(item) {
 }
 
 Blockly.Css.register(`
-  .spikeNoDropBadge circle {
-    fill: #fff;
-    stroke: #c62828;
-    stroke-width: 2.5;
-  }
-  .spikeNoDropBadge line {
-    stroke: #c62828;
-    stroke-width: 2.5;
+  /* Core's would-delete cursor, as .blocklyDraggingDelete has. */
+  .spikeWontLand,
+  .spikeWontLand * {
+    cursor: url("<<<PATH>>>/handdelete.cur"), auto !important;
   }
   .spikeInsertionLine {
     fill: #fc3;

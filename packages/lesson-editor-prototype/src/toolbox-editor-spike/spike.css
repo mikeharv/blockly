@@ -1,9 +1,9 @@
 #editorDiv {
   flex: 1 1 auto;
   position: relative;
-  /* The palette at its widest, the toolbox at its narrowest, and room for
-     pane 3, so a narrow window scrolls rather than squeezing pane 3. */
-  min-width: calc(320px + 100px + 250px);
+  /* The toolbox at its narrowest, and room for pane 3 and the palette,
+     which is never wider than pane 3. A narrower window scrolls. */
+  min-width: calc(100px + 2 * 250px);
 }
 
 /* So the toolbox stays a drop target with no categories left in it. Core
@@ -28,17 +28,6 @@
 
 .spikePopover input[type='number'] {
   width: 4rem;
-}
-
-/* A larger target for dragging toolbox separators, without changing their look. */
-.blocklyTreeSeparator {
-  position: relative;
-}
-
-.blocklyTreeSeparator::before {
-  content: '';
-  position: absolute;
-  inset: -6px 0;
 }
 
 #toolbar #status {

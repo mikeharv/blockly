@@ -13,14 +13,58 @@
 import * as Blockly from 'blockly';
 import {ContinuousCategory} from '@blockly/continuous-toolbox';
 import {applyEditorDragStrategy} from './drag_strategy';
+import {setWontLand} from './flyout_pane';
+import {EditorHeader} from './header';
+
+/** Material's "edit" icon. */
+const PENCIL_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+
+/** Material's "delete" icon. */
+const DELETE_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+
+/** Material's "drag indicator" icon. */
+const GRIP_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>';
+
+/**
+ * @param {string} className The icon's own class.
+ * @param {string} title Its tooltip.
+ * @param {string} svg Its SVG markup.
+ * @param {function()=} onClick What clicking it does, if anything.
+ * @returns {!HTMLElement} An icon for a toolbox row.
+ */
+function createIcon(className, title, svg, onClick) {
+  const icon = document.createElement('span');
+  icon.className = `spikeRowIcon ${className}`;
+  icon.title = title;
+  icon.innerHTML = svg;
+  if (onClick) {
+    icon.classList.add('spikeRowButton');
+    icon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onClick();
+    });
+  }
+  return icon;
+}
 
 /** The toolbox being edited. Its flyout is the palette. */
 export class EditorToolbox extends Blockly.Toolbox {
   /** @override */
   init() {
-    super.init();
-    const flyout = this.getFlyout();
+    // Before the palette is positioned, since it starts below the header.
     const editor = this.getEditor();
+    this.header = new EditorHeader(this.workspace_, editor.categories, (on) =>
+      editor.setCategories(on),
+    );
+    super.init();
+    // Core puts the toolbox first in the editor, which makes it the first
+    // tab stop. After the palette, it follows the layout: header, palette,
+    // toolbox, flyout pane.
+    this.workspace_.getParentSvg().before(this.HtmlDiv);
+    const flyout = this.getFlyout();
     editor.categoryChipWidth = undefined;
     flyout.show(editor.paletteContents());
     if (editor.mode !== 'flyout') {
@@ -28,7 +72,7 @@ export class EditorToolbox extends Blockly.Toolbox {
       const widths = flyout
         .getContents()
         .filter((item) => item.getElement().item?.kind === 'category')
-        .map((item) => item.getElement().getBoundingRectangle().getWidth());
+        .map((item) => item.getElement().chipWidth);
       editor.categoryChipWidth = Math.max(0, ...widths);
       flyout.show(editor.paletteContents());
     }
@@ -46,6 +90,17 @@ export class EditorToolbox extends Blockly.Toolbox {
     this.enableEditing();
     this.enableRowDragging();
     this.position();
+  }
+
+  /** @returns {number} The header's height. */
+  getHeaderHeight() {
+    return this.header?.height ?? 0;
+  }
+
+  /** @override */
+  dispose() {
+    this.header?.dispose();
+    super.dispose();
   }
 
   /** @returns {!Object} The editor that owns this toolbox. */
@@ -70,12 +125,20 @@ export class EditorToolbox extends Blockly.Toolbox {
   /** Core would show the selected category's contents in the flyout. @override */
   refreshSelection() {}
 
-  /** Puts the toolbox to the right of the palette. @override */
+  /**
+   * Puts the toolbox to the right of the palette, below the header, and
+   * sizes the header's sections to match. @override
+   */
   position() {
     super.position();
     if (!this.HtmlDiv) return;
     const flyout = this.getFlyout();
-    this.HtmlDiv.style.left = `${flyout?.isVisible() ? flyout.getWidth() : 0}px`;
+    const left = flyout?.isVisible() ? flyout.getWidth() : 0;
+    const headerHeight = this.getHeaderHeight();
+    this.HtmlDiv.style.left = `${left}px`;
+    this.HtmlDiv.style.top = `${headerHeight}px`;
+    this.HtmlDiv.style.height = `calc(100% - ${headerHeight}px)`;
+    this.header?.layout(left, this.workspace_.getCachedParentSvgSize().width);
   }
 
   /**
@@ -118,19 +181,75 @@ export class EditorToolbox extends Blockly.Toolbox {
     );
   }
 
-  /** @override */
+  /**
+   * Something that would go back where it came from shows core's
+   * would-delete look, as something this deletes does. @override
+   */
   onDragOver(element) {
     this.getEditor().showToolboxDropIndicator(element);
+    setWontLand(element, this.shouldPreventMove(element));
   }
 
   /** @override */
-  onDragExit() {
+  onDragExit(element) {
     this.getEditor().hideToolboxDropIndicator();
+    setWontLand(element, false);
   }
 
   /** @override */
   onDrop(element) {
+    setWontLand(element, false);
     this.getEditor().dropOnToolbox(element);
+  }
+
+  /**
+   * Adds the editing icons to each row, before the toolbox measures its
+   * width. @override
+   */
+  renderContents_(contents) {
+    super.renderContents_(contents);
+    for (const item of this.getToolboxItems()) {
+      if (item instanceof Blockly.ToolboxCategory) {
+        // Core's row element, which it doesn't expose.
+        this.addRowIcons(item, item.rowDiv_, true);
+      } else if (item instanceof Blockly.ToolboxSeparator) {
+        const row = item.getDiv();
+        row?.classList.add('spikeEditableSeparator');
+        this.addRowIcons(item, row, false);
+      }
+    }
+  }
+
+  /**
+   * Shows, on a toolbox row, what a toolbox normally can't do: rename a
+   * category (the pencil, as double-click or Enter), delete the row, and
+   * reorder it (the grip, a cue only: the whole row drags). Separators get
+   * an empty slot where the pencil goes, so every grip and delete button
+   * lines up. The icons are hidden from screen readers, since Enter edits
+   * the focused row; deleting and reordering by keyboard are still to do.
+   * @param {!Blockly.IToolboxItem} item The category or separator.
+   * @param {?HTMLElement} row The element to add them to.
+   * @param {boolean} renamable Whether it's a category.
+   */
+  addRowIcons(item, row, renamable) {
+    if (!row) return;
+    row.classList.add('spikeEditableRow');
+    const editor = this.getEditor();
+    const icons = document.createElement('div');
+    icons.className = 'spikeRowIcons';
+    const pencil = renamable
+      ? createIcon('spikeRowEdit', 'Rename and recolour', PENCIL_ICON, () =>
+          editor.editToolboxItem(item, 'edit'),
+        )
+      : createIcon('spikeRowPlaceholder', '', PENCIL_ICON);
+    icons.append(
+      pencil,
+      createIcon('spikeRowDelete', 'Delete', DELETE_ICON, () =>
+        editor.editToolboxItem(item, 'delete'),
+      ),
+      createIcon('spikeRowGrip', 'Drag to reorder', GRIP_ICON),
+    );
+    row.append(icons);
   }
 
   /**
@@ -250,6 +369,72 @@ export function registerCategoryClass(continuous) {
 }
 
 Blockly.Css.register(`
+  /* Room on the right for three 16px icons, which the toolbox's width
+     includes. Qualified to beat core's and the continuous rows' padding. */
+  .spikeEditableRow {
+    position: relative;
+  }
+  .blocklyToolboxCategory.spikeEditableRow {
+    padding-right: 60px;
+  }
+  .spikeRowIcons {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 2px;
+  }
+  .spikeRowIcon {
+    display: flex;
+    padding: 2px;
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+  .spikeRowIcon svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+  }
+  .spikeRowGrip {
+    cursor: grab;
+  }
+  .spikeRowButton {
+    cursor: pointer;
+  }
+  .spikeRowButton:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+  }
+  .spikeRowDelete:hover {
+    color: #c62828;
+  }
+  .spikeRowPlaceholder {
+    visibility: hidden;
+  }
+  /* A separator between categories is a row as tall as its icons, with its
+     line drawn across the middle up to them, instead of core's 1px border
+     with nothing to grab. Darker than core's line, so it reads as an item. */
+  .blocklyTreeSeparator.spikeEditableSeparator {
+    height: 20px;
+    margin: 2px 0;
+    border-bottom: none;
+  }
+  .spikeEditableSeparator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    right: 60px;
+    border-top: 1px solid #999;
+  }
+  /* Continuous rows keep the icons in a row too, like separators and
+     category-mode rows. The bubble and name centre in the space left of
+     them. Qualified to beat the continuous rows' own padding. */
+  .spikeContinuous .blocklyToolboxCategory.spikeEditableRow {
+    padding-left: 4px;
+    padding-right: 60px;
+  }
   .spikeRowCopy {
     position: fixed;
     z-index: 90;

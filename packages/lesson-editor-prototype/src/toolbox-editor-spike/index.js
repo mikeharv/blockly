@@ -13,14 +13,13 @@ import * as Blockly from 'blockly';
 import {installAllBlocks as installColourBlocks} from '@blockly/field-colour';
 import {javascriptGenerator} from 'blockly/javascript';
 import {toolboxTestBlocks} from '@blockly/block-test';
-import {ContinuousMetrics} from '@blockly/continuous-toolbox';
 import {registerLessonAuthoringContextMenuOptions} from '@blockly/plugin-lesson-authoring';
 import {blocks} from '../blocks/p5';
 import {toolbox as sourceToolbox} from '../toolbox';
 import {categoryColour} from './chips';
 import {EditorToolbox, registerCategoryClass} from './editor_toolbox';
-import {FlyoutPane} from './flyout_pane';
-import {PALETTE_ITEM, PALETTE_TOGGLE, PaletteFlyout} from './palette';
+import {FlyoutPane, FlyoutPaneMetrics} from './flyout_pane';
+import {PALETTE_ITEM, PaletteFlyout} from './palette';
 import '../index.css';
 import './spike.css';
 
@@ -177,8 +176,8 @@ const editor = {
   dropLine: null,
 
   /**
-   * Switches the toolbox between categories and a flyout, from the toggle
-   * at the top of the palette, and gives the new toggle focus.
+   * Switches the toolbox between categories and a flyout, from the header's
+   * toggle, and gives the new toggle focus.
    * @param {boolean} categories Whether it should have categories.
    */
   setCategories(categories) {
@@ -187,8 +186,7 @@ const editor = {
     this.categories = categories;
     convertModel(from, this.mode);
     inject();
-    const toggle = this.workspace.getFlyout().getToggle();
-    if (toggle) Blockly.getFocusManager().focusNode(toggle);
+    this.workspace.getToolbox().header.focusToggle();
   },
 
   /** @returns {!Array<!Object>} The palette's flyout contents. */
@@ -202,12 +200,11 @@ const editor = {
       'web-class': 'spikePaletteHeading',
     });
     return [
-      {kind: PALETTE_TOGGLE, categories: this.categories},
       // A flyout toolbox has no categories to add them to.
       ...(this.mode === 'flyout'
         ? []
         : [
-            heading('Categories'),
+            heading('Add categories'),
             entry(NEW_CATEGORY),
             ...sourceCategories.map(entry),
             ...dynamicCategories.map(entry),
@@ -733,7 +730,7 @@ function inject() {
     plugins: {
       toolbox: EditorToolbox,
       flyoutsVerticalToolbox: PaletteFlyout,
-      metricsManager: ContinuousMetrics,
+      metricsManager: FlyoutPaneMetrics,
     },
     renderer: rendererSelect.value,
     trashcan: false,

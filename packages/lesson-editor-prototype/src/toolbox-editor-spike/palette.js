@@ -20,15 +20,6 @@ export const PALETTE_ITEM = 'palette_item';
 /** Space between a tiled entry and its tile's edge. */
 const TILE_PADDING = 4;
 
-/** The palette's widest, in pixels. */
-const MAX_WIDTH = 320;
-
-/** The flyout item kind for the switch between categories and a flyout. */
-export const PALETTE_TOGGLE = 'palette_toggle';
-
-/** Matches Flyout.CORNER_RADIUS, which the flyout uses as its margin. */
-const MARGIN = 8;
-
 /** A vertical flyout that sits at the far left, left of the toolbox. */
 export class PaletteFlyout extends Blockly.VerticalFlyout {
   autoClose = false;
@@ -38,7 +29,7 @@ export class PaletteFlyout extends Blockly.VerticalFlyout {
     return 0;
   }
 
-  /** Keeps the toggle at the top after showing new contents. @override */
+  /** Lets the keyboard reach the palette's own entries. @override */
   show(contents) {
     super.show(contents);
     const navigator = this.getWorkspace().getNavigator();
@@ -47,277 +38,87 @@ export class PaletteFlyout extends Blockly.VerticalFlyout {
     ) {
       navigator.rules.push(new PaletteEntryNavigationPolicy());
     }
-    this.getToggle()?.raise();
-    this.pinToggle();
   }
 
-  /** Keeps the toggle at the top as the palette scrolls. @override */
-  setMetrics_(xyRatio) {
-    super.setMetrics_(xyRatio);
-    this.pinToggle();
+  /** @returns {?Object} The editor's header, above the palette. */
+  getHeader() {
+    return this.targetWorkspace.getToolbox()?.header ?? null;
   }
 
-  /** @returns {?PaletteToggle} The toggle, if the palette has one. */
-  getToggle() {
-    return (
-      this.getContents()
-        .map((item) => item.getElement())
-        .find((element) => element instanceof PaletteToggle) ?? null
-    );
-  }
-
-  /** Draws the toggle at the top of the palette's visible area. */
-  pinToggle() {
-    const top = this.getWorkspace()
-      .getMetricsManager()
-      .getViewMetrics(true).top;
-    this.getToggle()?.pin(top, this.getWidth());
+  /** Below the header. @override */
+  getY() {
+    return this.getHeader()?.height ?? 0;
   }
 
   /**
-   * Caps core's width, which fits the widest item. Wider items are cut off
-   * on the right, since a vertical flyout doesn't scroll sideways.
+   * Core fits the width to the widest item, as it does for the student's
+   * flyout, so a block is as wide here as in pane 3. But the palette is
+   * never wider than pane 3, so it takes at most half the room the toolbox
+   * leaves. Wider items are cut off on the right, since a vertical flyout
+   * doesn't scroll sideways.
    * @override
    */
   reflowInternal_() {
+    this.reflowing = true;
     super.reflowInternal_();
-    if (this.width_ <= MAX_WIDTH) return;
-    this.width_ = MAX_WIDTH;
-    this.position();
-    this.targetWorkspace.resizeContents();
+    this.naturalWidth = this.width_;
+    const width = Math.min(this.naturalWidth, this.getMaxWidth());
+    if (width !== this.width_) {
+      this.width_ = width;
+      this.position();
+    }
+    this.reflowing = false;
+    // Moves the toolbox and pane 3 to match.
+    this.targetWorkspace.resize();
     this.targetWorkspace.recordDragTargets();
   }
-}
-
-/**
- * The switch between a category toolbox and a flyout one, as the palette's
- * first item. It's two of core's flyout buttons side by side, the chosen
- * one drawn as a normal button and the other as an outline. It stays at the
- * top of the palette however far it scrolls, over a strip of the palette's
- * background, so the items scroll under it.
- */
-class PaletteToggle {
-  /**
-   * @param {!Blockly.IFlyout} flyout The palette.
-   * @param {boolean} categories Whether the toolbox has categories.
-   */
-  constructor(flyout, categories) {
-    this.flyout = flyout;
-    this.workspace = flyout.getWorkspace();
-    this.categories = categories;
-    this.id = Blockly.utils.idGenerator.getNextUniqueId();
-    this.position = new Blockly.utils.Coordinate(0, 0);
-    this.top = 0;
-
-    this.svgGroup = Blockly.utils.dom.createSvgElement(
-      Blockly.utils.Svg.G,
-      {class: 'spikePaletteToggle'},
-      this.workspace.getCanvas(),
-    );
-    // Covers whatever has scrolled up under the toggle. The palette's
-    // background can be translucent, so it goes over an opaque base, and
-    // takes the theme's colours as the flyout's own background does.
-    this.strips = ['spikePaletteToggleBase', 'blocklyFlyoutBackground'].map(
-      (className) =>
-        Blockly.utils.dom.createSvgElement(
-          Blockly.utils.Svg.RECT,
-          {class: className},
-          this.svgGroup,
-        ),
-    );
-    const themeManager = this.workspace.getThemeManager();
-    themeManager.subscribe(this.strips[1], 'flyoutBackgroundColour', 'fill');
-    themeManager.subscribe(this.strips[1], 'flyoutOpacity', 'fill-opacity');
-
-    // A flyout label naming the choice, left of the buttons.
-    this.label = createInertFlyoutButton(
-      this.workspace,
-      {kind: 'label', text: 'Toolbox Type'},
-      true,
-    );
-    const labelRoot = this.label.getSvgRoot();
-    this.svgGroup.appendChild(labelRoot);
-    Blockly.utils.aria.setRole(labelRoot, Blockly.utils.aria.Role.NONE);
-    Blockly.utils.aria.clearState(labelRoot, Blockly.utils.aria.State.LABEL);
-    const labelRect = this.label.getBoundingRectangle();
-    const controlX = labelRect.getWidth() + MARGIN;
-
-    // What takes focus: the two buttons and core's focus ring around them,
-    // without the strip.
-    this.control = Blockly.utils.dom.createSvgElement(
-      Blockly.utils.Svg.G,
-      {id: this.id, transform: `translate(${controlX},0)`},
-      this.svgGroup,
-    );
-    const {aria} = Blockly.utils;
-    aria.setRole(this.control, aria.Role.CHECKBOX);
-    aria.setState(this.control, aria.State.LABEL, 'Categories');
-    aria.setState(this.control, aria.State.CHECKED, categories);
-    const focusRing = Blockly.utils.dom.createSvgElement(
-      Blockly.utils.Svg.RECT,
-      {class: 'blocklyFocusRing', rx: 4},
-      this.control,
-    );
-
-    this.buttons = [];
-    let x = 0;
-    for (const [text, value] of [
-      ['Categories', true],
-      ['Flyout', false],
-    ]) {
-      const button = createInertFlyoutButton(
-        this.workspace,
-        {kind: 'button', text},
-        false,
-      );
-      const root = button.getSvgRoot();
-      this.control.appendChild(root);
-      root.setAttribute('transform', `translate(${x},0)`);
-      root.classList.toggle('spikeToggleOff', value !== categories);
-      aria.setRole(root, aria.Role.NONE);
-      aria.clearState(root, aria.State.LABEL);
-      root.addEventListener('pointerdown', (e) => {
-        e.stopPropagation();
-        Blockly.getFocusManager().focusNode(this);
-      });
-      root.addEventListener('click', () => this.choose(value));
-      const rect = button.getBoundingRectangle();
-      x += rect.getWidth() + MARGIN / 2;
-      this.height = rect.getHeight();
-      this.buttons.push(button);
-    }
-    this.size = {width: controlX + x - MARGIN / 2, height: this.height};
-    labelRoot.setAttribute(
-      'transform',
-      `translate(0,${(this.height - labelRect.getHeight()) / 2})`,
-    );
-    const ringPadding = 3;
-    focusRing.setAttribute('x', String(-ringPadding));
-    focusRing.setAttribute('y', String(-ringPadding));
-    focusRing.setAttribute('width', String(x - MARGIN / 2 + 2 * ringPadding));
-    focusRing.setAttribute(
-      'height',
-      String(this.size.height + 2 * ringPadding),
-    );
-  }
 
   /**
-   * Switches the toolbox between categories and a flyout.
-   * @param {boolean} categories Whether it should have categories.
+   * Core sizes a flyout only when its contents change. This also sizes the
+   * palette again when the window resizes, which moves the cap.
+   * @override
    */
-  choose(categories) {
-    if (categories === this.categories) return;
-    this.flyout.targetWorkspace.spikeEditor.setCategories(categories);
-  }
-
-  /** Enter or Space switches to the other choice. */
-  performAction() {
-    this.choose(!this.categories);
-  }
-
-  /** Draws the toggle over the items after it. */
-  raise() {
-    this.svgGroup.parentNode.appendChild(this.svgGroup);
-  }
-
-  /**
-   * Draws the toggle at the top of the visible area.
-   * @param {number} top The visible area's top, in workspace units.
-   * @param {number} width The palette's width.
-   */
-  pin(top, width) {
-    this.top = Math.max(0, top);
-    this.svgGroup.setAttribute(
-      'transform',
-      `translate(${this.position.x},${this.position.y + this.top})`,
-    );
-    for (const strip of this.strips) {
-      strip.setAttribute('x', String(-this.position.x));
-      strip.setAttribute('y', String(-this.position.y));
-      strip.setAttribute('width', String(width));
-      strip.setAttribute(
-        'height',
-        String(this.position.y + this.height + MARGIN),
-      );
+  position() {
+    super.position();
+    this.fitBelowHeader();
+    if (this.reflowing || this.naturalWidth === undefined) return;
+    if (Math.min(this.naturalWidth, this.getMaxWidth()) !== this.width_) {
+      this.reflow();
     }
   }
 
-  getBoundingRectangle() {
-    const y = this.position.y + this.top;
-    return new Blockly.utils.Rect(
-      y,
-      y + this.size.height,
-      this.position.x,
-      this.position.x + this.size.width,
+  /**
+   * Core sizes a vertical flyout to the workspace's view, which also starts
+   * below the header but is offset from the toolbox, so this sets the
+   * palette's height itself: from the header to the bottom.
+   */
+  fitBelowHeader() {
+    if (!this.isVisible()) return;
+    const height =
+      this.targetWorkspace.getCachedParentSvgSize().height - this.getY();
+    if (this.height_ === height) return;
+    this.height_ = height;
+    // Private in core; draws the background at the new height.
+    this.setBackgroundPath(
+      this.getWidth() - this.CORNER_RADIUS,
+      height - 2 * this.CORNER_RADIUS,
     );
+    this.positionAt_(this.getWidth(), height, this.getX(), this.getY());
   }
 
-  moveBy(dx, dy) {
-    this.position = new Blockly.utils.Coordinate(
-      this.position.x + dx,
-      this.position.y + dy,
+  /**
+   * @returns {number} Half the room left after the toolbox, but always wide
+   *     enough for the header's Toolbox Type toggle.
+   */
+  getMaxWidth() {
+    const svgWidth = this.targetWorkspace.getCachedParentSvgSize().width;
+    const toolboxWidth = this.targetWorkspace.getToolbox()?.getWidth() ?? 0;
+    return Math.max(
+      Math.floor((svgWidth - toolboxWidth) / 2),
+      this.getHeader()?.minPaletteWidth ?? 0,
     );
-    this.pin(this.top, MAX_WIDTH);
-  }
-
-  getSvgRoot() {
-    return this.svgGroup;
-  }
-
-  getRelativeToSurfaceXY() {
-    return this.position;
-  }
-
-  getFocusableElement() {
-    return this.control;
-  }
-
-  getFocusableTree() {
-    return this.workspace;
-  }
-
-  onNodeFocus() {}
-
-  onNodeBlur() {}
-
-  canBeFocused() {
-    return true;
-  }
-
-  dispose() {
-    this.label.dispose();
-    for (const button of this.buttons) button.dispose();
-    this.svgGroup.remove();
   }
 }
-
-/** Creates the toggle from a `palette_toggle` entry. */
-class PaletteToggleInflater {
-  load(state, flyout) {
-    return new Blockly.FlyoutItem(
-      new PaletteToggle(flyout, state.categories),
-      PALETTE_TOGGLE,
-    );
-  }
-
-  gapForItem(_state, defaultGap) {
-    return defaultGap;
-  }
-
-  disposeItem(item) {
-    item.getElement().dispose();
-  }
-
-  getType() {
-    return PALETTE_TOGGLE;
-  }
-}
-
-Blockly.registry.register(
-  Blockly.registry.Type.FLYOUT_INFLATER,
-  PALETTE_TOGGLE,
-  PaletteToggleInflater,
-);
 
 /**
  * A palette entry for something other than a block: a category, separator,
@@ -342,12 +143,7 @@ class PaletteItem {
       {id: this.id, class: 'spikePaletteItem'},
       this.workspace.getCanvas(),
     );
-    const kind = item.kind.toLowerCase();
-    if (kind === 'category') {
-      this.size = drawCategory(this.svgGroup, item, this.workspace);
-    } else {
-      this.size = this.drawTiled(kind, item);
-    }
+    this.size = this.drawTiled(item.kind.toLowerCase(), item);
 
     this.svgGroup.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
@@ -361,9 +157,9 @@ class PaletteItem {
   }
 
   /**
-   * Draws a separator, label or button on a dashed tile, so it reads as
-   * something to drag rather than part of the palette. Category chips
-   * already look like cards.
+   * Draws the entry on a dashed tile, so it reads as something to drag or
+   * click to add, rather than part of the palette. For a category, that
+   * also sets it apart from a toolbox row, which would select it.
    * @param {string} kind The item's kind.
    * @param {!object} item Its toolbox JSON.
    * @returns {{width: number, height: number}} The tile's size.
@@ -380,7 +176,11 @@ class PaletteItem {
       this.svgGroup,
     );
     let size;
-    if (kind === 'sep') {
+    if (kind === 'category') {
+      size = drawCategory(content, item, this.workspace);
+      // The toolbox makes every chip as wide as the widest, untiled.
+      this.chipWidth = size.width;
+    } else if (kind === 'sep') {
       size = drawSeparatorChip(content);
     } else {
       this.button = createInertFlyoutButton(
@@ -495,7 +295,7 @@ class PaletteItem {
 }
 
 /**
- * Lets the keyboard reach palette entries and the toggle, as core's policy
+ * Lets the keyboard reach palette entries, as core's policy
  * for flyout buttons does for buttons. Core's flyout navigator works out
  * their order from the flyout's contents.
  */
@@ -525,7 +325,7 @@ class PaletteEntryNavigationPolicy {
   }
 
   isApplicable(current) {
-    return current instanceof PaletteItem || current instanceof PaletteToggle;
+    return current instanceof PaletteItem;
   }
 }
 
@@ -558,30 +358,6 @@ Blockly.registry.register(
 );
 
 Blockly.Css.register(`
-  .spikePaletteToggleBase {
-    fill: #fff;
-  }
-  /* The choice that isn't selected, drawn as an outlined button. */
-  .spikeToggleOff .blocklyFlyoutButtonBackground {
-    fill: transparent;
-    stroke: #888;
-  }
-  /* Beats the renderer's text colour, which includes its own two classes. */
-  .blocklyFlyout .spikePaletteToggle .spikeToggleOff .blocklyText {
-    fill: #575e75;
-  }
-  .spikeToggleOff .blocklyFlyoutButtonShadow {
-    display: none;
-  }
-  .spikePaletteToggle .blocklyFocusRing {
-    fill: none;
-  }
-  .spikePaletteToggle :focus {
-    outline: none;
-  }
-  .spikePaletteToggle .blocklyFlyoutButton {
-    cursor: pointer;
-  }
   .spikePaletteItem {
     cursor: grab;
   }

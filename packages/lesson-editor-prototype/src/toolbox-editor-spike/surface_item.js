@@ -293,15 +293,16 @@ export class SurfaceItem {
 }
 
 Blockly.Css.register(`
+  /* Dark enough to see on the flyout background. */
   .spikeSeparatorOutline {
     fill: transparent;
-    stroke: #ddd;
+    stroke: #888;
     stroke-dasharray: 4 3;
   }
   .spikeSurface-sep:hover .spikeSeparatorOutline,
   .spikeSurface-sep.blocklySelected .spikeSeparatorOutline {
-    stroke: #888;
-    fill: rgba(0, 0, 0, 0.04);
+    stroke: #444;
+    fill: rgba(0, 0, 0, 0.06);
   }
   .spikeSurfaceItem.blocklySelected .blocklyFlyoutButton,
   .spikeSurfaceItem.blocklySelected .blocklyFlyoutLabel {
@@ -313,7 +314,14 @@ Blockly.Css.register(`
   .spikeSurface-heading {
     cursor: default;
   }
-  .blocklyDraggingDelete {
+  /* Buttons, labels and separators have no paths for core's styles, so
+     they fade as well as taking the delete cursor. */
+  .spikeSurfaceItem.blocklyDraggingDelete,
+  .spikeSurfaceItem.spikeWontLand {
     opacity: 0.5;
+  }
+  .spikeSurfaceItem.blocklyDraggingDelete,
+  .spikeSurfaceItem.blocklyDraggingDelete * {
+    cursor: url("<<<PATH>>>/handdelete.cur"), auto;
   }
 `);

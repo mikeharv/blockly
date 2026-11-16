@@ -33,6 +33,7 @@
     "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
+    "@blockly/continuous-toolbox": "^13.4.0",
     "@blockly/field-colour": "^13.4.0",
     "@blockly/plugin-lesson-authoring": "^13.4.0",
     "blockly": "^13.4.0",
