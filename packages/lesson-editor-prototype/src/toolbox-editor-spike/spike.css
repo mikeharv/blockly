@@ -3,7 +3,7 @@
   position: relative;
   /* The palette at its widest, the toolbox at its narrowest, and room for
      pane 3, so a narrow window scrolls rather than squeezing pane 3. */
-  min-width: calc(250px + 100px + 250px);
+  min-width: calc(320px + 100px + 250px);
 }
 
 /* So the toolbox stays a drop target with no categories left in it. Core

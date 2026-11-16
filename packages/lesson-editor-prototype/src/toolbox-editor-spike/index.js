@@ -20,7 +20,7 @@ import {toolbox as sourceToolbox} from '../toolbox';
 import {categoryColour} from './chips';
 import {EditorToolbox, registerCategoryClass} from './editor_toolbox';
 import {FlyoutPane} from './flyout_pane';
-import {PALETTE_ITEM, PaletteFlyout} from './palette';
+import {PALETTE_ITEM, PALETTE_TOGGLE, PaletteFlyout} from './palette';
 import '../index.css';
 import './spike.css';
 
@@ -32,7 +32,7 @@ registerLessonAuthoringContextMenuOptions();
 hideLockItemsInEditor();
 
 const editorDiv = document.getElementById('editorDiv');
-const modeSelect = document.getElementById('modeSelect');
+const continuousInput = document.getElementById('continuousInput');
 const rendererSelect = document.getElementById('rendererSelect');
 const testBlocksInput = document.getElementById('testBlocksInput');
 const statusText = document.getElementById('status');
@@ -157,7 +157,15 @@ const NEW_CATEGORY = {
 const NEW_LABEL = {kind: 'label', text: 'New label'};
 
 const editor = {
-  mode: modeSelect.value,
+  /** The author's choice, from the toggle at the top of the palette. */
+  categories: true,
+  /** The host's setting: whether it uses @blockly/continuous-toolbox. */
+  continuous: continuousInput.checked,
+  /** @returns {string} 'flyout', 'category' or 'continuous'. */
+  get mode() {
+    if (!this.categories) return 'flyout';
+    return this.continuous ? 'continuous' : 'category';
+  },
   /** The toolbox definition being edited. */
   model: structuredClone(initialToolbox),
   /** Which model entry pane 3 shows, in category mode. */
@@ -167,6 +175,21 @@ const editor = {
   workspace: null,
   pane: null,
   dropLine: null,
+
+  /**
+   * Switches the toolbox between categories and a flyout, from the toggle
+   * at the top of the palette, and gives the new toggle focus.
+   * @param {boolean} categories Whether it should have categories.
+   */
+  setCategories(categories) {
+    this.commitPane();
+    const from = this.mode;
+    this.categories = categories;
+    convertModel(from, this.mode);
+    inject();
+    const toggle = this.workspace.getFlyout().getToggle();
+    if (toggle) Blockly.getFocusManager().focusNode(toggle);
+  },
 
   /** @returns {!Array<!Object>} The palette's flyout contents. */
   paletteContents() {
@@ -179,6 +202,7 @@ const editor = {
       'web-class': 'spikePaletteHeading',
     });
     return [
+      {kind: PALETTE_TOGGLE, categories: this.categories},
       // A flyout toolbox has no categories to add them to.
       ...(this.mode === 'flyout'
         ? []
@@ -819,10 +843,11 @@ function newBlocksCategory(contents) {
   return {kind: 'category', name: 'Blocks', colour: '#888888', contents};
 }
 
-modeSelect.addEventListener('change', () => {
+// Category and continuous toolboxes share a definition, so this only
+// changes how the editor draws it.
+continuousInput.addEventListener('change', () => {
   editor.commitPane();
-  convertModel(editor.mode, modeSelect.value);
-  editor.mode = modeSelect.value;
+  editor.continuous = continuousInput.checked;
   inject();
 });
 
