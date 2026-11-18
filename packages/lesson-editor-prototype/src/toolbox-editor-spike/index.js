@@ -518,11 +518,12 @@ const editor = {
 
   /**
    * Redraws pane 2 from the model and selects an entry without saving pane 3
-   * over it. Toolbox.render is @internal, which a real version would need to
-   * address.
+   * over it. Redraws through IToolbox.render, which is public; only Toolbox's
+   * own implementation is marked @internal.
    * @param {number} selected The model index to select.
    */
   renderToolbox(selected) {
+    /** @type {!Blockly.IToolbox} */
     const toolbox = this.workspace.getToolbox();
     toolbox.render(this.model);
     this.suppressSave = true;

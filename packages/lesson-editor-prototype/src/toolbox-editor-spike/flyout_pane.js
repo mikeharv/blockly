@@ -99,13 +99,6 @@ export class FlyoutPane {
      * item and the index it would land at.
      */
     this.preview = null;
-
-    // Core's lookup only knows blocks, comments and the workspace's own
-    // flyout items. Without this, focusing a surface item by DOM focus falls
-    // back to the workspace, and it can't be selected or dragged.
-    const lookUp = workspace.lookUpFocusableNode.bind(workspace);
-    workspace.lookUpFocusableNode = (id) =>
-      [...this.surfaceItems].find((item) => item.id === id) ?? lookUp(id);
   }
 
   /**

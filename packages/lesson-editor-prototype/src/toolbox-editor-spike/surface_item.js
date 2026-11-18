@@ -70,6 +70,16 @@ export class SurfaceItem {
     this.svgGroup.addEventListener('dblclick', () => {
       if (this.isMovable()) this.handlers.onEdit(this);
     });
+
+    // Lets core find this item by its ID when it takes focus, as it finds
+    // blocks. WorkspaceSvg.lookUpFocusableNode checks focusable components
+    // after its own items. The ID is the SVG group's, which is what it
+    // matches.
+    workspace.getComponentManager().addComponent({
+      component: this,
+      weight: 0,
+      capabilities: [Blockly.ComponentManager.Capability.FOCUSABLE],
+    });
   }
 
   /**
@@ -280,6 +290,7 @@ export class SurfaceItem {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.workspace.getComponentManager().removeComponent(this.id);
     this.button?.dispose();
     this.svgGroup.remove();
     this.handlers.onDispose(this);
