@@ -195,7 +195,7 @@
     "webdriverio": "^10.2.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "peerDependencies": {
     "jsdom": ">=27.4.0 <32.0.0"
