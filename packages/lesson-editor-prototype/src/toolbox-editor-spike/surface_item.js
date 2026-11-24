@@ -15,6 +15,9 @@ import {drawCategory} from './chips';
 /** Width of a separator's outline, in workspace units. */
 const SEPARATOR_WIDTH = 160;
 
+/** A separator's gap when it doesn't set one. Matches Flyout.GAP_Y. */
+const DEFAULT_SEPARATOR_GAP = 24;
+
 /**
  * Creates a FlyoutButton with its own pointer handling switched off. Its
  * handlers send gestures to the workspace's flyout and run button callbacks,
@@ -132,11 +135,10 @@ export class SurfaceItem {
 
   /** @returns {number} The separator's gap, as core's flyout reads it. */
   getGap() {
-    // A separator without a gap collapses the space to nothing in a real
-    // flyout (SeparatorFlyoutInflater.gapForItem returns NaN, so no implicit
-    // separator is added and the zero-height one wins).
-    const gap = parseInt(String(this.info.gap));
-    return isNaN(gap) ? 0 : gap;
+    return new Blockly.SeparatorFlyoutInflater().gapForItem(
+      this.info,
+      DEFAULT_SEPARATOR_GAP,
+    );
   }
 
   /** Keeps the outline grabbable even for a small gap. */

@@ -23,6 +23,9 @@ const READ_ONLY_MESSAGE =
 /** Matches Flyout.GAP_Y. */
 const GAP_Y = MARGIN * 3;
 
+/** Reads a block's gap as core's flyout does. */
+const blockInflater = new Blockly.BlockFlyoutInflater();
+
 /**
  * Pane 3's metrics. A real flyout can't scroll above its contents, so
  * neither can pane 3: its scroll area starts at the top of the canvas,
@@ -238,8 +241,13 @@ export class FlyoutPane {
       .getTopBlocks(false)
       .filter((block) => !block.isDragging() && !block.isInsertionMarker());
     const others = [...this.surfaceItems].filter((item) => !item.dragging);
+    // A separator with no height shares its top with the item after it, so
+    // on a tie the separator comes first. Otherwise it would sort after that
+    // item, and move one place further down on every layout.
     return [...blocks, ...others].sort(
-      (a, b) => a.getBoundingRectangle().top - b.getBoundingRectangle().top,
+      (a, b) =>
+        a.getBoundingRectangle().top - b.getBoundingRectangle().top ||
+        Number(isSeparator(b)) - Number(isSeparator(a)),
     );
   }
 
@@ -266,6 +274,7 @@ export class FlyoutPane {
           0,
           this.ghost ?? {
             slot: true,
+            separator: isSeparator(preview.item),
             height: rect.getHeight(),
             width: rect.getWidth(),
           },
@@ -779,13 +788,26 @@ function splitBlockGaps({contents, tags}) {
     };
     add(isBlock ? rest : info);
     if (isBlock && gap !== undefined && next?.kind.toLowerCase() !== 'sep') {
-      add({kind: 'sep', gap});
+      // The space core's flyout actually leaves, which a block's gap and a
+      // separator's gap don't always agree on (a block's gap of 0 means the
+      // default gap, for example). Negative gaps aren't supported, so they
+      // become the default gap too.
+      const blockGap = blockInflater.gapForItem(info, GAP_Y);
+      add({kind: 'sep', gap: blockGap < 0 ? GAP_Y : blockGap});
     }
   });
   return result;
 }
 
+/**
+ * @param {*} item An item in the layout, or the drop preview's slot.
+ * @returns {boolean} Whether it's a separator, which replaces the gaps on
+ *     either side of it rather than adding to them. A slot left for a
+ *     dragged separator counts as one, so the preview takes the same space
+ *     the separator will.
+ */
 function isSeparator(item) {
+  if (item?.slot) return item.separator;
   return item instanceof SurfaceItem && item.kind === 'sep';
 }
 

@@ -142,15 +142,6 @@ export class EditorToolbox extends Blockly.Toolbox {
   }
 
   /**
-   * A hidden toolbox takes no room. Core keeps the width it last measured,
-   * so in flyout mode pane 3 would start that far past the palette.
-   * @override
-   */
-  getWidth() {
-    return this.isVisible_ ? super.getWidth() : 0;
-  }
-
-  /**
    * Only the toolbox itself is a drop target. Core's rect runs to the left
    * edge of the screen, which would cover the palette. @override
    */
